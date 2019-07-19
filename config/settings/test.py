@@ -27,6 +27,9 @@ CACHES = {
     }
 }
 
+PROJECT_APPS = LOCAL_APPS
+
+
 # PASSWORDS
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#password-hashers
