@@ -112,3 +112,25 @@ class TestTaskAPIs(TestCase):
         self.assertEqual(response.status_code, 404)
         task.refresh_from_db()
         self.assertEqual(task.state, Task.STATES.NEW)
+
+    def test_link_2_tasks(self):
+        task = TaskFactory.create(state=Task.STATES.IN_PROGRESS)
+        task_to_link = TaskFactory.create(state=Task.STATES.IN_PROGRESS)
+        response = self.client.post(
+            '/api/v1/tasks/{}/link-task/'.format(task.pk), data=json.dumps({'task': task_to_link.pk}),
+            content_type='application/json')
+
+        self.assertEqual(response.status_code, 200)
+        task.refresh_from_db()
+        self.assertEqual(task.linked_task_id, task_to_link.pk)
+
+    def test_link_2_tasks_wrong_task_id(self):
+        task = TaskFactory.create(state=Task.STATES.IN_PROGRESS)
+        task_to_link = TaskFactory.create(state=Task.STATES.IN_PROGRESS)
+        response = self.client.post(
+            '/api/v1/tasks/{}/link-task/'.format(task.pk), data=json.dumps({'task': task_to_link.pk+100}),
+            content_type='application/json')
+
+        self.assertEqual(response.status_code, 404)
+        task.refresh_from_db()
+        self.assertIsNone(task.linked_task)
