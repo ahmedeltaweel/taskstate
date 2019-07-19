@@ -69,6 +69,7 @@ THIRD_PARTY_APPS = [
     "allauth.account",
     "allauth.socialaccount",
     "rest_framework",
+    'rest_framework.authtoken',
 ]
 
 LOCAL_APPS = [
@@ -241,6 +242,25 @@ LOGGING = {
         }
     },
     "root": {"level": "INFO", "handlers": ["console"]},
+}
+
+# RESTFRAMEWORK SETTINGS
+# ------------------------------------------------------------------------------
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ),
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.MultiPartParser'
+    ),
+    'PAGE_SIZE': 20,
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
+    'DEFAULT_VERSION': 'v1',
 }
 
 
