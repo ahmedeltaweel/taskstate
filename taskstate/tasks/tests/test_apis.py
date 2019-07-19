@@ -72,3 +72,43 @@ class TestTaskAPIs(TestCase):
         response = self.client.delete('/api/v1/tasks/{}/'.format(task.pk), content_type='application/json')
         self.assertEqual(response.status_code, 204)
         self.assertFalse(Task.objects.filter(pk=task.pk).exists())
+
+    def test_set_task_in_progress(self):
+        task = TaskFactory.create(state=Task.STATES.NEW)
+        response = self.client.post(
+            '/api/v1/tasks/{}/set-in-progress/'.format(task.pk),
+            content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        task.refresh_from_db()
+        self.assertEqual(task.state, Task.STATES.IN_PROGRESS)
+        response = response.json()
+        self.assertEqual(response['state'], 'in progress')
+
+    def test_set_task_in_progress_wrong_task_id(self):
+        task = TaskFactory.create(state=Task.STATES.NEW)
+        response = self.client.post(
+            '/api/v1/tasks/{}/set-in-progress/'.format(task.pk + 10000),
+            content_type='application/json')
+        self.assertEqual(response.status_code, 404)
+        task.refresh_from_db()
+        self.assertEqual(task.state, Task.STATES.NEW)
+
+    def test_set_task_done(self):
+        task = TaskFactory.create(state=Task.STATES.IN_PROGRESS)
+        response = self.client.post(
+            '/api/v1/tasks/{}/set-done/'.format(task.pk),
+            content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        task.refresh_from_db()
+        self.assertEqual(task.state, Task.STATES.DONE)
+        response = response.json()
+        self.assertEqual(response['state'], 'done')
+
+    def test_set_task_done_wrong_task_id(self):
+        task = TaskFactory.create(state=Task.STATES.NEW)
+        response = self.client.post(
+            '/api/v1/tasks/{}/set-done/'.format(task.pk + 10000),
+            content_type='application/json')
+        self.assertEqual(response.status_code, 404)
+        task.refresh_from_db()
+        self.assertEqual(task.state, Task.STATES.NEW)

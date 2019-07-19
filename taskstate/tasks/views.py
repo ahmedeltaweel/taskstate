@@ -1,4 +1,6 @@
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from taskstate.tasks.models import Task
@@ -9,3 +11,17 @@ class TasksViewSet(ModelViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = (IsAuthenticated,)
+
+    @action(detail=True, methods=['post'], url_path='set-in-progress')
+    def set_in_progress(self, request, pk=None):
+        task = self.get_object()
+        task.state = Task.STATES.IN_PROGRESS
+        task.save()
+        return Response({'state': 'in progress'})
+
+    @action(detail=True, methods=['post'], url_path='set-done')
+    def set_done(self, request, pk=None):
+        task = self.get_object()
+        task.state = Task.STATES.DONE
+        task.save()
+        return Response({'state': 'done'})
