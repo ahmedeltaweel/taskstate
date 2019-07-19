@@ -52,6 +52,37 @@ class TestTaskAPIs(TestCase):
         self.assertEqual(response['description'], data['description'])
         self.assertEqual(response['state'], Task.STATES.NEW)
 
+    def test_update_task_state(self):
+        data = {
+            'title': 'new updated task',
+            'description': 'test description',
+            'state': Task.STATES.IN_PROGRESS
+        }
+        task = TaskFactory.create(state=Task.STATES.NEW)
+        response = self.client.put(
+            '/api/v1/tasks/{}/'.format(task.pk),
+            data=json.dumps(data),
+            content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        response = response.json()
+        task.refresh_from_db()
+        self.assertEqual(response['title'], data['title'])
+        self.assertEqual(response['description'], data['description'])
+        # did not update as it's a read only field
+        self.assertEqual(response['state'], Task.STATES.NEW)
+
+    def test_update_task_with_done_state(self):
+        data = {
+            'title': 'new updated task',
+            'description': 'test description'
+        }
+        task = TaskFactory.create(state=Task.STATES.DONE)
+        response = self.client.put(
+            '/api/v1/tasks/{}/'.format(task.pk),
+            data=json.dumps(data),
+            content_type='application/json')
+        self.assertEqual(response.status_code, 404)
+
     def test_parital_update_task(self):
         data = {
             'description': 'test new description'
@@ -66,6 +97,17 @@ class TestTaskAPIs(TestCase):
         task.refresh_from_db()
         self.assertEqual(response['description'], data['description'])
         self.assertEqual(response['state'], Task.STATES.NEW)
+
+    def test_parital_update_task_with_done_state(self):
+        data = {
+            'description': 'test new description'
+        }
+        task = TaskFactory.create(state=Task.STATES.DONE)
+        response = self.client.patch(
+            '/api/v1/tasks/{}/'.format(task.pk),
+            data=json.dumps(data),
+            content_type='application/json')
+        self.assertEqual(response.status_code, 404)
 
     def test_delete_task(self):
         task = TaskFactory.create()

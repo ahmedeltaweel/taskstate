@@ -39,3 +39,7 @@ class TasksViewSet(ModelViewSet):
         task.linked_task = new_task
         task.save()
         return Response({'state': 'done'})
+
+    def update(self, request, *args, **kwargs):
+        self.queryset = self.queryset.filter(state__in=[Task.STATES.NEW, Task.STATES.IN_PROGRESS])
+        return super(TasksViewSet, self).update(request, *args, **kwargs)
